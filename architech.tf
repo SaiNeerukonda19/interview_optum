@@ -3,7 +3,6 @@ provider "azurerm" {
   features {}
 }
 
-
 resource "azurerm_resource_group" "eastrg" {
   name = "eastus-terraform-rg"
   location = "eastus"
@@ -16,15 +15,15 @@ resource "azurerm_resource_group" "westrg" {
 
 resource "azurerm_virtual_network" "myvneteast" {
   name = "my-vnet"
-  address_space = ["10.0.0.0/16"]
-  location = "northeurope"
+  address_space = ["10.2.0.0/20"]
+  location = "eastus"
   resource_group_name = azurerm_resource_group.eastrg.name
 }
 
 resource "azurerm_virtual_network" "myvnetwest" {
   name = "my-vnet"
-  address_space = ["10.0.0.0/16"]
-  location = "northeurope"
+  address_space = ["10.1.0.0/20"]
+  location = "westus"
   resource_group_name = azurerm_resource_group.westrg.name
 }
 
@@ -32,19 +31,19 @@ resource "azurerm_subnet" "eastfrontendsubnet" {
   name = "frontendSubnet"
   resource_group_name =  azurerm_resource_group.eastrg.name
   virtual_network_name = azurerm_virtual_network.myvneteast.name
-  address_prefix = "10.0.1.0/24"
+  address_prefix = "10.2.0.0/20"
 }
 
 resource "azurerm_subnet" "westfrontendsubnet" {
   name = "frontendSubnet"
   resource_group_name =  azurerm_resource_group.westrg.name
   virtual_network_name = azurerm_virtual_network.myvnetwest.name
-  address_prefix = "10.0.1.0/24"
+  address_prefix = "10.1.0.0/20"
 }
 
 resource "azurerm_public_ip" "eastmyvm1publicip" {
   name = "pip1"
-  location = "northeurope"
+  location = "eastus"
   resource_group_name = azurerm_resource_group.eastrg.name
   allocation_method = "Dynamic"
   sku = "Basic"
@@ -52,7 +51,7 @@ resource "azurerm_public_ip" "eastmyvm1publicip" {
 
 resource "azurerm_public_ip" "westmyvm1publicip" {
   name = "pip1"
-  location = "northeurope"
+  location = "westus"
   resource_group_name = azurerm_resource_group.westrg.name
   allocation_method = "Dynamic"
   sku = "Basic"
@@ -60,7 +59,7 @@ resource "azurerm_public_ip" "westmyvm1publicip" {
 
 resource "azurerm_network_interface" "eastmyvm1nic" {
   name = "myvm1-nic"
-  location = "northeurope"
+  location = "eastus"
   resource_group_name = azurerm_resource_group.eastrg.name
 
   ip_configuration {
@@ -74,7 +73,7 @@ resource "azurerm_network_interface" "eastmyvm1nic" {
 
 resource "azurerm_network_interface" "westmyvm1nic" {
   name = "myvm1-nic"
-  location = "northeurope"
+  location = "westus"
   resource_group_name = azurerm_resource_group.westrg.name
 
   ip_configuration {
@@ -88,7 +87,7 @@ resource "azurerm_network_interface" "westmyvm1nic" {
 
 resource "azurerm_windows_virtual_machine" "example" {
   name                  = "myvm1"  
-  location              = "northeurope"
+  location              = "eastus"
   resource_group_name   = azurerm_resource_group.easrrg.name
   network_interface_ids = [azurerm_network_interface.eastmyvm1nic.id]
   size                  = "Standard_B1s"
@@ -110,7 +109,7 @@ resource "azurerm_windows_virtual_machine" "example" {
 
 resource "azurerm_windows_virtual_machine" "example" {
   name                  = "myvm1"  
-  location              = "northeurope"
+  location              = "westus"
   resource_group_name   = azurerm_resource_group.westrg.name
   network_interface_ids = [azurerm_network_interface.westmyvm1nic.id]
   size                  = "Standard_B1s"
